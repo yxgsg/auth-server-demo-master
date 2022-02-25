@@ -126,7 +126,7 @@ public class AuthServerConfiguration {
     public ProviderSettings providerSettings() {
         // @formatter:off
         return ProviderSettings.builder()
-                .issuer("http://localhost:3000")
+                .issuer("http://localhost:8080")
                 .build();
         // @formatter:on
     }
