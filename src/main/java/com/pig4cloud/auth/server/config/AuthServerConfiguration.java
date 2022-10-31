@@ -26,6 +26,8 @@ import org.springframework.security.config.annotation.web.configuration.OAuth2Au
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -34,6 +36,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.config.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.config.ProviderSettings;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeRequestAuthenticationConverter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -61,6 +64,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class AuthServerConfiguration {
 
     protected final Log logger = LogFactory.getLog(getClass());
+
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -71,20 +75,32 @@ public class AuthServerConfiguration {
     // @formatter:off
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient client = RegisteredClient.withId("pig")
+//        RegisteredClient client = RegisteredClient.withId("pig")
+//                .clientId("123")
+//                .clientSecret("{noop}123456")
+//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_JWT)
+//                .authorizationGrantTypes(authorizationGrantTypes -> {
+//                    authorizationGrantTypes.add(AuthorizationGrantType.AUTHORIZATION_CODE);
+//                    authorizationGrantTypes.add(AuthorizationGrantType.REFRESH_TOKEN);
+//                })
+////                .scope("all")
+//                .redirectUri("https://xiaodu.baidu.com/saiya/auth/61aa9ad19fde08075c2f7ab78254f2da")
+////                .redirectUri("https://open.bot.tmall.com/oauth/callback")
+//                .build();
+
+        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("123")
-                .clientSecret("{noop}123456")
+                .clientSecret(new BCryptPasswordEncoder().encode("123456"))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .authorizationGrantTypes(authorizationGrantTypes -> {
-                    authorizationGrantTypes.add(AuthorizationGrantType.AUTHORIZATION_CODE);
-                    authorizationGrantTypes.add(AuthorizationGrantType.REFRESH_TOKEN);
-                })
-//                .scope("openid")
-                .redirectUri("https://open.bot.tmall.com/oauth/callback")
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .redirectUri("https://xiaodu.baidu.com/saiya/auth/61aa9ad19fde08075c2f7ab78254f2da")
+//                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .build();
 
 
-        return new InMemoryRegisteredClientRepository(client);
+        return new InMemoryRegisteredClientRepository(registeredClient);
     }
     // @formatter:on
 
@@ -126,7 +142,7 @@ public class AuthServerConfiguration {
     public ProviderSettings providerSettings() {
         // @formatter:off
         return ProviderSettings.builder()
-                .issuer("http://localhost:8080")
+                .issuer("https://192.168.110.249:3000")
                 .build();
         // @formatter:on
     }

@@ -28,7 +28,7 @@ public class DefaultSecurityConfig {
         UserDetails user = User.builder()
                 .username("admin")
                 .password("{noop}password")
-                .roles("USER")
+                .roles("ADMIN")
                 .build();
         return new InMemoryUserDetailsManager(user);
     }
@@ -38,7 +38,7 @@ public class DefaultSecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests(authorizeRequests ->
-                        authorizeRequests.anyRequest().authenticated()
+                        authorizeRequests.antMatchers("/oauth2/token").permitAll().anyRequest().authenticated()
                 )
                 .formLogin(withDefaults());
         return http.build();
